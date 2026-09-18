@@ -2,7 +2,8 @@
 
 :root{
   --ink:#12283c; --ink-soft:#5d7284; --line:#dfe7ed; --bg:#f4f7fa; --card:#ffffff;
-  --navy:#092e46; --navy-soft:#15465e; --teal:#16a88b; --teal-light:#e9f7f4;
+  --navy:#1c1a40; --navy-soft:#2e2a68; --brand:#6a59f7; --brand-light:#eeecfe;
+  --ok:#0e8a68; --ok-light:#e7f6f1; --ok-line:#c3e9dd;
   --gold:#b98a2a; --gold-light:#fbf3e2; --danger:#c04432; --danger-light:#fdeeeb;
   --warn:#b26a12; --warn-light:#fdf3e6; --info:#1f6f9c; --info-light:#eaf3fa;
   --radius:14px;
@@ -16,7 +17,7 @@ small{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#eef3f6;padding:2px 6px;border-radius:6px}
 .muted{color:var(--ink-soft)}
 .small{font-size:12.5px}
-.ok-text{color:#0a7a63;display:inline-flex;align-items:center;gap:5px}
+.ok-text{color:var(--ok);display:inline-flex;align-items:center;gap:5px}
 .warn-text{color:var(--warn);display:inline-flex;align-items:center;gap:5px}
 
 /* ---------- botões ---------- */
@@ -25,10 +26,10 @@ button,.chip,.ghost,.primary{font:inherit}
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   border-radius:10px;padding:11px 17px;font-weight:700;font-size:14px;cursor:pointer;border:1px solid transparent;
 }
-.primary{background:var(--teal);color:#fff}
-.primary:hover{background:#12967c}
+.primary{background:var(--brand);color:#fff}
+.primary:hover{background:#5745e6}
 .ghost{background:#fff;border-color:var(--line);color:#31505f}
-.ghost:hover{border-color:#b9ccd6}
+.ghost:hover{border-color:#c3bdea}
 .danger{background:var(--danger);color:#fff}
 .block{width:100%}
 .small{padding:8px 13px;font-size:13px}
@@ -37,18 +38,18 @@ button.icon{
   background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px;
   display:inline-flex;align-items:center;justify-content:center;color:#44606f;cursor:pointer;
 }
-button.icon:hover{border-color:#b9ccd6;color:var(--navy)}
+button.icon:hover{border-color:#c3bdea;color:var(--brand)}
 button.icon.danger{background:#fff;border-color:#f0cdc6;color:var(--danger)}
 .link{display:inline-flex;align-items:center;gap:6px;color:#0f7a9c;font-weight:700;font-size:13px;text-decoration:none}
 .link-plain{display:inline-flex;align-items:center;gap:6px;justify-content:center;margin-top:16px;color:var(--ink-soft);font-size:13px;text-decoration:none}
-.link-plain:hover{color:var(--teal)}
+.link-plain:hover{color:var(--brand)}
 
 /* ---------- formulários ---------- */
 input,select,textarea{
   width:100%;border:1px solid #d8e3e9;border-radius:10px;padding:11px 12px;
   font:inherit;color:var(--ink);background:#fff;outline:0;
 }
-input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px #20b89a1f}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px #6a59f71f}
 textarea{resize:vertical;min-height:84px}
 .field{display:block}
 .field>span{display:block;font-size:12.5px;font-weight:700;color:#3d5a6b;margin-bottom:6px}
@@ -65,7 +66,7 @@ textarea{resize:vertical;min-height:84px}
 /* ---------- avisos ---------- */
 .alert{display:flex;align-items:flex-start;gap:9px;padding:12px 14px;border-radius:11px;font-size:13.5px;margin:14px 0;
   background:var(--danger-light);color:#8e3627;border:1px solid #f4d5ce}
-.alert.ok{background:var(--teal-light);color:#0a7a63;border-color:#c6ebe2}
+.alert.ok{background:var(--ok-light);color:var(--ok);border-color:var(--ok-line)}
 .alert.warn{background:var(--warn-light);color:#8a5410;border-color:#f3dfc1}
 .alert>div{flex:1}
 .alert .icon{background:transparent;border:0;padding:0;color:inherit}
@@ -74,29 +75,29 @@ textarea{resize:vertical;min-height:84px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:56px 20px;color:var(--ink-soft);background:#fff;border:1px dashed #cfdde5;border-radius:var(--radius)}
 .empty svg{color:#b4c6d0}
-.empty h3{margin:12px 0 6px;color:#2b4a5d}
+.empty h3{margin:12px 0 6px;color:#332e5c}
 .empty p{margin:0;font-size:13.5px}
 
 .badge{display:inline-block;padding:5px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:#eef2f5;color:#4b6376}
-.badge.ok{background:var(--teal-light);color:#0a7a63}
+.badge.ok{background:var(--ok-light);color:var(--ok)}
 .badge.warn{background:var(--warn-light);color:#8a5410}
 .badge.info{background:var(--info-light);color:#1a5b80}
 .badge.off{background:#eef2f5;color:#71838f}
 
 .progress{display:flex;align-items:center;gap:9px;min-width:130px}
 .progress .track{flex:1;height:7px;background:#e6edf1;border-radius:5px;overflow:hidden}
-.progress .track>i{display:block;height:100%;background:var(--teal);border-radius:5px;transition:width .3s}
+.progress .track>i{display:block;height:100%;background:var(--brand);border-radius:5px;transition:width .3s}
 .progress>b{font-size:12px;color:#4b6376;min-width:34px;text-align:right}
 
 /* ---------- login ---------- */
 .login{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;background:var(--bg)}
-.login-side{background:linear-gradient(150deg,#092e46,#12506b);color:#fff;padding:clamp(30px,6vw,70px);display:flex;flex-direction:column;justify-content:center}
+.login-side{background:linear-gradient(150deg,#1c1a40,#3b2f8f);color:#fff;padding:clamp(30px,6vw,70px);display:flex;flex-direction:column;justify-content:center}
 .login-side h1{font-size:clamp(30px,3.6vw,44px);margin:18px 0 14px}
-.login-side p{color:#b9cfdb;line-height:1.6;max-width:430px}
+.login-side p{color:#c9c4ee;line-height:1.6;max-width:430px}
 .login-side ul{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:11px}
-.login-side li{display:flex;align-items:center;gap:9px;color:#cfe3ec;font-size:13.5px}
-.login-side li svg{color:#35d0b1}
-.logo{width:52px;height:52px;border-radius:15px;background:#20b89a;display:grid;place-items:center;color:#062b20}
+.login-side li{display:flex;align-items:center;gap:9px;color:#d6d2f4;font-size:13.5px}
+.login-side li svg{color:#9d90ff}
+.logo{width:56px;height:56px;border-radius:16px;background:var(--brand);display:grid;place-items:center;color:#fff}
 .login-form{display:flex;flex-direction:column;justify-content:center;padding:clamp(26px,5vw,70px);background:#fff}
 .login-form h2{font-size:22px;margin-bottom:6px}
 .login-form p.muted{margin:0 0 20px;font-size:13.5px}
@@ -104,31 +105,31 @@ textarea{resize:vertical;min-height:84px}
 .tabs{display:flex;gap:8px;background:#eef3f6;padding:5px;border-radius:12px;margin-bottom:24px}
 .tabs button{flex:1;border:0;background:transparent;padding:10px;border-radius:9px;font-weight:700;font-size:13.5px;color:#5d7284;
   display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
-.tabs button.active{background:#fff;color:var(--navy);box-shadow:0 2px 8px #0b2d450f}
+.tabs button.active{background:#fff;color:var(--brand);box-shadow:0 2px 8px #1c1a400f}
 .tabs.slim{display:inline-flex;gap:6px;margin:0 0 18px}
 .tabs.slim button{padding:9px 16px}
 
 /* ---------- layout ---------- */
 .app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
 aside{background:var(--navy);color:#fff;padding:24px 16px;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;width:250px}
-.brand{display:flex;align-items:center;gap:12px;padding:0 8px 26px}
-.brandmark{width:42px;height:42px;background:#20b89a;border-radius:12px;display:grid;place-items:center;color:#062b20}
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:2px 8px 26px}
+.brandmark{width:42px;height:42px;background:var(--brand);border-radius:12px;display:grid;place-items:center;color:#fff}
 .brand b{font:800 18px Manrope;display:block}
-.brand span{font-size:10.5px;color:#9ab3c2;letter-spacing:.09em;text-transform:uppercase}
+.brand span{font-size:10.5px;color:#a49ede;letter-spacing:.09em;text-transform:uppercase}
 nav{display:grid;gap:6px}
-nav button{border:0;background:transparent;color:#aac0cc;padding:12px 13px;border-radius:10px;
+nav button{border:0;background:transparent;color:#b3ade0;padding:12px 13px;border-radius:10px;
   display:flex;align-items:center;gap:11px;font:600 13.5px 'DM Sans',sans-serif;text-align:left;cursor:pointer;position:relative}
 nav button.active,nav button:hover{background:var(--navy-soft);color:#fff}
 .dot{position:absolute;right:12px;background:#e0654f;color:#fff;font-style:normal;font-size:10.5px;font-weight:700;
   min-width:19px;height:19px;border-radius:10px;display:grid;place-items:center;padding:0 5px}
 .tabs .dot{position:static;margin-left:6px}
-.who{margin-top:22px;background:#0f3c56;border-radius:12px;padding:14px}
+.who{margin-top:22px;background:#2a2560;border-radius:12px;padding:14px}
 .who b{display:block;font-size:14px}
-.who span{font-size:12px;color:#9ab3c2}
+.who span{font-size:12px;color:#a49ede}
 .aside-foot{margin-top:auto;display:grid;gap:8px;padding-top:18px}
-.aside-foot>span{font-size:11.5px;color:#8fa9b8;letter-spacing:.06em;text-transform:uppercase}
-.aside-foot .ghost{background:#12455e;border-color:#1d5872;color:#d5e6ee}
-.aside-foot .ghost:hover{background:#17536e}
+.aside-foot>span{font-size:11.5px;color:#9c95d6;letter-spacing:.06em;text-transform:uppercase}
+.aside-foot .ghost{background:#2a2560;border-color:#3b3480;color:#ded9fb}
+.aside-foot .ghost:hover{background:#352e75}
 main{grid-column:2;padding:34px clamp(20px,4vw,52px);max-width:1500px;width:100%}
 
 .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:22px}
@@ -154,7 +155,7 @@ th.num,td.num{text-align:right}
 .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
 .tile b{display:block;font:800 26px Manrope}
 .tile span{font-size:12.5px;color:var(--ink-soft)}
-.tile.ok b{color:#0a7a63}
+.tile.ok b{color:var(--ok)}
 .tile.info b{color:var(--info)}
 .tile.off b{color:#7c8e9b}
 
@@ -163,7 +164,7 @@ th.num,td.num{text-align:right}
 .lesson-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;
   display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center}
 .lesson-card.clickable{grid-template-columns:1fr 170px;cursor:pointer}
-.lesson-card.clickable:hover{border-color:#bcd7ce;box-shadow:0 8px 22px #12304709}
+.lesson-card.clickable:hover{border-color:#cdc7fb;box-shadow:0 8px 22px #1c1a4012}
 .lesson-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .lesson-title h3{font-size:16.5px}
 .lesson-main p{margin:8px 0 0;font-size:13.5px;line-height:1.55}
@@ -183,7 +184,7 @@ th.num,td.num{text-align:right}
 .lesson-head h2{font-size:24px}
 .lesson-head p{margin:6px 0 0;font-size:13px}
 .video-wrap{display:grid;gap:8px}
-.video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#06202f;border-radius:var(--radius);overflow:hidden}
+.video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#14122e;border-radius:var(--radius);overflow:hidden}
 .video-frame iframe,.video-frame>div{position:absolute;inset:0;width:100%;height:100%;border:0}
 .empty-video{display:grid;place-content:center;justify-items:center;gap:10px;color:#9db6c4;padding:30px;text-align:center}
 .empty-video p{margin:0;font-size:13.5px;max-width:320px}
@@ -193,7 +194,7 @@ th.num,td.num{text-align:right}
 .chip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:22px;
   padding:9px 15px;font-size:13px;font-weight:600;color:#3d5a6b;cursor:pointer;text-decoration:none}
 .chip:hover{border-color:#b9ccd6}
-.chip.active{background:var(--teal-light);border-color:#bfe6dc;color:#0a7a63}
+.chip.active{background:var(--brand-light);border-color:#cdc7fb;color:#4a3ad6}
 .chip.active.down{background:var(--warn-light);border-color:#f0dcbe;color:#8a5410}
 .chip.gold{background:var(--gold-light);border-color:#eddcb6;color:var(--gold)}
 .lesson-content{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
@@ -207,7 +208,7 @@ th.num,td.num{text-align:right}
 /* ---------- notificações ---------- */
 .feed{display:grid;gap:11px}
 .note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
-.note.unread{border-color:#bfe6dc;background:#fbfffe;box-shadow:inset 3px 0 0 var(--teal)}
+.note.unread{border-color:#cdc7fb;background:#fcfbff;box-shadow:inset 3px 0 0 var(--brand)}
 .note-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .note-head b{font-size:14px}
 .note-head span{display:block;font-size:12px;color:var(--ink-soft)}
@@ -237,7 +238,7 @@ th.num,td.num{text-align:right}
 .validate-box h1{font-size:22px}
 .validate-box input{text-align:center;font-size:17px;letter-spacing:.09em;font-weight:700}
 .certificate{background:#fff;width:min(1040px,100%);aspect-ratio:1.414/1;padding:14px;box-shadow:0 20px 60px #0b2d4514}
-.cert-border{border:2px solid var(--navy);outline:6px solid #f2f6f8;height:100%;padding:clamp(20px,3.6vw,46px);
+.cert-border{border:2px solid var(--brand);outline:6px solid #f3f2fb;height:100%;padding:clamp(20px,3.6vw,46px);
   display:flex;flex-direction:column;position:relative}
 .cert-border::after{content:'';position:absolute;inset:8px;border:1px solid #d9e3ea;pointer-events:none}
 .cert-border>header{display:flex;justify-content:space-between;align-items:center}
@@ -245,7 +246,7 @@ th.num,td.num{text-align:right}
 .cert-logo{width:48px;height:48px;border-radius:13px;background:var(--navy);color:#fff;display:grid;place-items:center;font:800 15px Manrope}
 .cert-brand b{display:block;font:800 17px Manrope;color:var(--navy)}
 .cert-brand span{font-size:10.5px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
-.cert-kind{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--teal)}
+.cert-kind{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--brand)}
 .certificate h1{font-size:clamp(30px,4.4vw,52px);text-align:center;margin-top:clamp(14px,3vw,34px);color:var(--navy);letter-spacing:.06em;text-transform:uppercase}
 .cert-intro{text-align:center;color:var(--ink-soft);margin:14px 0 6px;font-size:14px}
 .certificate h2{text-align:center;font-size:clamp(22px,3.2vw,34px);color:#0d3a56}
@@ -297,4 +298,37 @@ th.num,td.num{text-align:right}
   .modal-actions{flex-direction:column-reverse}
   .modal-actions button{width:100%}
   .certificate{aspect-ratio:auto}
+}
+
+/* ---------- marca DOC CSC ---------- */
+.brand-logo{display:block;height:40px;width:auto}
+.login-logo{display:block;width:min(280px,70%);height:auto;margin-bottom:26px}
+.cert-mark{display:block;height:clamp(34px,3.4vw,46px);width:auto}
+
+/* ---------- exigências da aula ---------- */
+.checklist{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;display:grid;gap:14px}
+.checklist h3{font-size:15px}
+.checklist>div{display:grid;grid-template-columns:20px 1fr 150px;align-items:center;gap:14px;color:#3d5a6b}
+.checklist>div>svg{color:#b7c3cd}
+.checklist>div.done>svg{color:var(--ok)}
+.checklist b{display:block;font-size:14px;color:var(--ink)}
+.checklist span{font-size:12.5px;color:var(--ink-soft)}
+.checklist>div.done b{color:var(--ok)}
+.checklist>p{margin:0;font-size:13.5px}
+
+/* ---------- leitor de PDF ---------- */
+.pdf-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;display:grid;gap:14px}
+.pdf-box>header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pdf-box h3{font-size:15px;display:flex;align-items:center;gap:8px}
+.pdf-progress{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pdf-progress>span{font-size:12.5px;color:var(--ink-soft)}
+.pdf-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pdf-frame{width:100%;height:min(70vh,720px);border:1px solid var(--line);border-radius:12px;background:#f7f8fb}
+.pdf-box>p{margin:0}
+
+@media(max-width:620px){
+  .checklist>div{grid-template-columns:20px 1fr;row-gap:8px}
+  .checklist .progress{grid-column:1/-1}
+  .pdf-frame{height:60vh}
+  .pdf-actions>*{width:100%;justify-content:center}
 }

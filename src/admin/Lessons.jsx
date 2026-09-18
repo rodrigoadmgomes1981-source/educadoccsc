@@ -145,7 +145,7 @@ export default function Lessons({contracts,onChanged}){
 
       {editing?(
         <Modal wide title={editing.id?'Editar aula':'Nova aula'}
-               subtitle="O vídeo é um link do YouTube ou do Vimeo; o material de apoio é um PDF de até 4 MB."
+               subtitle="Vídeo por link do YouTube ou Vimeo (90% assistidos). Havendo PDF, o profissional também precisa lê-lo e confirmar a leitura."
                onClose={()=>setEditing(null)}>
           <form onSubmit={save} className="form-grid">
             <Field label="Título da aula *" span={2}>
@@ -164,7 +164,7 @@ export default function Lessons({contracts,onChanged}){
             <Field label="Link do vídeo" span={2} hint="Ex.: https://youtu.be/XXXXXXX ou https://vimeo.com/123456789">
               <input value={editing.videoUrl} onChange={e=>set('videoUrl',e.target.value)} placeholder="https://"/>
             </Field>
-            <Field label="Carga horária (minutos)" hint="Aparece no certificado.">
+            <Field label="Carga horária (minutos)" hint="Aparece no certificado. Sem vídeo, define o tempo mínimo de leitura do PDF (90% dela).">
               <input inputMode="numeric" value={editing.workloadMinutes} onChange={e=>set('workloadMinutes',e.target.value.replace(/\D/g,''))}/>
             </Field>
             <Field label="Data de início" hint="Quando a aula fica disponível.">
@@ -173,7 +173,7 @@ export default function Lessons({contracts,onChanged}){
             <Field label="Prazo final" hint="Último dia para assistir.">
               <input type="date" value={editing.endsOn} onChange={e=>set('endsOn',e.target.value)}/>
             </Field>
-            <Field label="Material de apoio (PDF)" hint={editing.pdfName?`Atual: ${editing.pdfName}`:'Opcional, até 4 MB.'}>
+            <Field label="Material de apoio (PDF)" hint={editing.pdfName?`Atual: ${editing.pdfName}`:'Opcional, até 4 MB. Havendo PDF, a aula só conclui com a leitura confirmada.'}>
               <input type="file" accept="application/pdf" ref={fileRef}/>
             </Field>
             {editing.pdfName?(

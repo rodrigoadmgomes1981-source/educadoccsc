@@ -1,13 +1,14 @@
 import {db} from '../lib/db.js';
 import {session} from '../lib/auth.js';
-import {COMPLETION,UUID,certificateCode,fail,handleError,readJson,text} from '../lib/util.js';
+import {UUID,certificateCode,evaluateLesson,fail,handleError,missingMessage,readJson,text} from '../lib/util.js';
 
 /** Consulta pública pelo código impresso no certificado. */
 async function validate(req,res,sql){
   const code=text(req.query.code,32).toUpperCase();
   if(!code)return fail(res,400,'Informe o código do certificado.');
   const rows=await sql`
-    SELECT g.certificate_code,g.watched_seconds,g.duration_seconds,
+    SELECT g.certificate_code,g.watched_seconds,g.duration_seconds,g.pdf_seconds,g.pdf_confirmed_at,
+           l.video_provider,l.pdf_name,
            to_char(g.certificate_at AT TIME ZONE 'America/Porto_Velho','YYYY-MM-DD') AS certificate_date,
            to_char(g.completed_at AT TIME ZONE 'America/Porto_Velho','YYYY-MM-DD') AS completed_date,
            p.name AS professional_name,p.role AS professional_role,p.council,p.council_number,
@@ -31,13 +32,15 @@ async function issue(req,res,sql){
   const professionalId=auth.role==='admin'?String(body.professionalId||''):auth.id;
   if(!UUID.test(lessonId)||!UUID.test(String(professionalId)))return fail(res,404,'Aula ou profissional não encontrado.');
 
-  const rows=await sql`SELECT id,watched_seconds,duration_seconds,completed_at,certificate_code
-    FROM progress WHERE lesson_id=${lessonId}::uuid AND professional_id=${professionalId}::uuid`;
-  if(!rows.length)return fail(res,400,'Esta aula ainda não foi assistida.');
+  const rows=await sql`SELECT g.id,g.watched_seconds,g.duration_seconds,g.pdf_seconds,g.pdf_confirmed_at,
+           g.completed_at,g.certificate_code,
+           l.video_provider,l.video_id,l.pdf_name,l.workload_minutes
+    FROM progress g JOIN lessons l ON l.id=g.lesson_id
+    WHERE g.lesson_id=${lessonId}::uuid AND g.professional_id=${professionalId}::uuid`;
+  if(!rows.length)return fail(res,400,'Esta aula ainda não foi iniciada.');
   const row=rows[0];
-  const percent=row.duration_seconds>0?row.watched_seconds/row.duration_seconds:0;
-  if(!row.completed_at&&percent<COMPLETION)
-    return fail(res,400,`O certificado é liberado com ${Math.round(COMPLETION*100)}% da aula assistidos. Assistido até agora: ${Math.round(percent*100)}%.`);
+  const state=evaluateLesson(row,row);
+  if(!row.completed_at&&!state.complete)return fail(res,400,missingMessage(state));
 
   if(row.certificate_code)return res.status(200).json({ok:true,code:row.certificate_code});
 

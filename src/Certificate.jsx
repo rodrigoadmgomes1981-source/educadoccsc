@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {ArrowLeft, Award, Printer, Search} from 'lucide-react';
+import {ArrowLeft, Printer, Search} from 'lucide-react';
 import {api} from './api.js';
 import {Alert,Spinner,formatDate,formatDuration} from './ui.jsx';
 
@@ -39,7 +39,7 @@ export default function Certificate({code:initial}){
     return (
       <div className="certificate-page">
         <form className="validate-box" onSubmit={e=>{e.preventDefault();find(code.trim().toUpperCase())}}>
-          <div className="logo"><Award size={24}/></div>
+          <img className="cert-mark" src="/logo-doccsc-escura.png" alt="DOC CSC"/>
           <h1>Validação de certificado</h1>
           <p className="muted">Digite o código impresso no rodapé do certificado (formato DOC-XXXX-XXXX).</p>
           <input value={code} onChange={e=>setCode(e.target.value.toUpperCase())} placeholder="DOC-XXXX-XXXX" required/>
@@ -52,6 +52,8 @@ export default function Certificate({code:initial}){
   }
 
   const council=[data.council,data.council_number].filter(Boolean).join(' ');
+  const hasVideo=!!data.video_provider;
+  const hasPdf=!!data.pdf_name;
   const hours=Number(data.workload_minutes)||0;
   const workload=hours>=60?`${(hours/60).toFixed(hours%60?1:0).replace('.',',')} hora(s)`:`${hours} minutos`;
 
@@ -66,11 +68,7 @@ export default function Certificate({code:initial}){
         <div className="cert-border">
           <header>
             <div className="cert-brand">
-              <div className="cert-logo">DOC</div>
-              <div>
-                <b>DOC CSC</b>
-                <span>Centro de Serviços Compartilhados</span>
-              </div>
+              <img className="cert-mark" src="/logo-doccsc-escura.png" alt="DOC CSC — Centro de Serviços Compartilhados"/>
             </div>
             <div className="cert-kind">Educação Virtual</div>
           </header>
@@ -83,11 +81,12 @@ export default function Certificate({code:initial}){
             concluiu o treinamento <b>“{data.lesson_title}”</b>
             {hours?<>, com carga horária de <b>{workload}</b></>:null}
             , promovido pela DOC CSC no âmbito do contrato <b>{data.contract_name}</b>
-            {data.completed_date?<>, tendo assistido ao conteúdo integral em <b>{formatDate(data.completed_date)}</b></>:null}.
+            {data.completed_date?<>, tendo cumprido {hasVideo&&hasPdf?'o conteúdo em vídeo e a leitura do material':hasPdf?'a leitura integral do material':'o conteúdo integral'} em <b>{formatDate(data.completed_date)}</b></>:null}.
           </p>
 
           <div className="cert-details">
-            <div><span>Tempo registrado</span><b>{formatDuration(data.watched_seconds)}</b></div>
+            {hasVideo?<div><span>Tempo de vídeo</span><b>{formatDuration(data.watched_seconds)}</b></div>:null}
+            {hasPdf?<div><span>Leitura do material</span><b>{formatDuration(data.pdf_seconds)}</b></div>:null}
             <div><span>Emitido em</span><b>{formatDate(data.certificate_date||data.completed_date)}</b></div>
             <div><span>Código de validação</span><b>{data.certificate_code}</b></div>
           </div>

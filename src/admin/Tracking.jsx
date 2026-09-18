@@ -52,13 +52,17 @@ export default function Tracking({contracts}){
   }
 
   function exportCsv(){
-    const header=['Contrato','Profissional','Função','Conselho','Aula','Situação','Primeiro acesso','Última visualização','Tempo assistido (min)','% assistido','Certificado'];
+    const header=['Contrato','Profissional','Função','Conselho','Aula','Situação','Primeiro acesso','Última visualização',
+      'Tempo de vídeo (min)','% do vídeo','Leitura do PDF (min)','Leitura confirmada em','% concluído','Certificado'];
     const lines=visible.map(r=>[
       r.contract_name,r.name,r.role,[r.council,r.council_number].filter(Boolean).join(' '),r.lesson_title,
       STATES[r.state]?.label||r.state,
       r.first_view_at?formatDateTime(r.first_view_at):'',
       r.last_view_at?formatDateTime(r.last_view_at):'',
-      Math.round((Number(r.watched_seconds)||0)/60),
+      r.hasVideo?Math.round((Number(r.watched_seconds)||0)/60):'',
+      r.hasVideo?r.videoPercent:'',
+      r.hasPdf?Math.round((Number(r.pdf_seconds)||0)/60):'',
+      r.pdf_confirmed_at?formatDateTime(r.pdf_confirmed_at):'',
       r.percent,
       r.certificate_code||''
     ].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';'));

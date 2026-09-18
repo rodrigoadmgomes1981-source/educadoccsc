@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {db} from '../lib/db.js';
 import {requireAdmin,session} from '../lib/auth.js';
-import {MAX_UPLOAD,UUID,bool,fail,handleError,parseVideo,readForm,text,toDate,toInt} from '../lib/util.js';
+import {MAX_UPLOAD,UUID,bool,evaluateLesson,fail,handleError,parseVideo,readForm,text,toDate,toInt} from '../lib/util.js';
 
 /** Lista para o administrador, com indicadores de cada aula. */
 async function listForAdmin(req,res,sql){
@@ -31,7 +31,8 @@ async function listForUser(req,res,sql,auth){
            to_char(l.starts_on,'YYYY-MM-DD') AS starts_on,
            to_char(l.ends_on,'YYYY-MM-DD') AS ends_on,
            c.name AS contract_name,
-           p.watched_seconds,p.duration_seconds,p.completed_at,p.certificate_code,p.last_view_at,
+           p.watched_seconds,p.duration_seconds,p.pdf_seconds,p.pdf_confirmed_at,
+           p.completed_at,p.certificate_code,p.last_view_at,
            r.value AS reaction,
            (SELECT COUNT(*) FROM reactions x WHERE x.lesson_id=l.id AND x.value=1) AS likes,
            (SELECT COUNT(*) FROM reactions x WHERE x.lesson_id=l.id AND x.value=-1) AS dislikes
@@ -45,12 +46,20 @@ async function listForUser(req,res,sql,auth){
   const lessons=rows.map(l=>{
     const before=l.starts_on&&today<String(l.starts_on).slice(0,10);
     const after=l.ends_on&&today>String(l.ends_on).slice(0,10);
-    const duration=Number(l.duration_seconds||0);
-    const watched=Number(l.watched_seconds||0);
+    const state=evaluateLesson(l,l);
     return {...l,
       available:!before&&!after,
       status:before?'agendada':after?'encerrada':'disponivel',
-      percent:duration>0?Math.min(100,Math.round(watched/duration*100)):0
+      percent:state.percent,
+      videoPercent:state.videoPercent,
+      pdfPercent:state.pdfPercent,
+      pdfRequired:state.pdfRequired,
+      pdfTimeOk:state.pdfTimeOk,
+      videoOk:state.videoOk,
+      pdfOk:state.pdfOk,
+      hasVideo:state.hasVideo,
+      hasPdf:state.hasPdf,
+      complete:!!l.completed_at||state.complete
     };
   });
   return res.status(200).json({lessons});
@@ -84,6 +93,15 @@ async function save(req,res,sql){
     pdfType='application/pdf';
     pdfB64=Buffer.from(await file.arrayBuffer()).toString('base64');
   }
+
+  // Sem vídeo, a carga horária é o que define o tempo mínimo de leitura do PDF.
+  let keepsPdf=!!pdfB64;
+  if(id&&!pdfB64&&!removePdf){
+    const current=await sql`SELECT pdf_name FROM lessons WHERE id=${id}::uuid`;
+    keepsPdf=!!current[0]?.pdf_name;
+  }
+  if(keepsPdf&&!video.provider&&workload<1)
+    return fail(res,400,'Informe a carga horária em minutos: ela define o tempo mínimo de leitura do material em PDF.');
 
   if(id){
     const rows=await sql`UPDATE lessons SET contract_id=${contractId}::uuid, title=${title}, content=${content},

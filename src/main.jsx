@@ -1,6 +1,6 @@
 import {StrictMode,useCallback,useEffect,useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Bell, Briefcase, ClipboardList, GraduationCap, KeyRound, LogOut, Users, Video} from 'lucide-react';
+import {Bell, Briefcase, ClipboardList, KeyRound, LogOut, Users, Video} from 'lucide-react';
 import {api,clearSession,loadSession,saveSession} from './api.js';
 import {Alert,Field,Modal} from './ui.jsx';
 import Login from './Login.jsx';
@@ -85,11 +85,8 @@ function AdminApp({session,onLogout}){
     <div className="app">
       <aside>
         <div className="brand">
-          <div className="brandmark"><GraduationCap size={22}/></div>
-          <div>
-            <b>DOC CSC</b>
-            <span>Educação Virtual</span>
-          </div>
+          <img className="brand-logo" src="/logo-doccsc.png" alt="DOC CSC"/>
+          <span>Educação Virtual</span>
         </div>
         <nav>
           {TABS.map(({key,label,icon:Icon})=>(
@@ -123,11 +120,8 @@ function StudentApp({session,onLogout,onSession}){
     <div className="app student">
       <aside>
         <div className="brand">
-          <div className="brandmark"><GraduationCap size={22}/></div>
-          <div>
-            <b>DOC CSC</b>
-            <span>Educação Virtual</span>
-          </div>
+          <img className="brand-logo" src="/logo-doccsc.png" alt="DOC CSC"/>
+          <span>Educação Virtual</span>
         </div>
         <div className="who">
           <b>{session.name}</b>

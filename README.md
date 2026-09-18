@@ -26,26 +26,40 @@ Para rodar na sua máquina: `npm install` e `npm run dev` (as rotas `/api/*` só
 ### Administrador
 
 - **Contratos** — cliente, CNPJ, gestor, vigência e situação. Excluir um contrato apaga aulas, profissionais e histórico dele.
-- **Aulas** — título, conteúdo em texto, link do vídeo (YouTube ou Vimeo), PDF de apoio (até 4 MB), carga horária, contrato a que se aplica (ou *todos os contratos*), data de início e prazo final. Fora da janela de datas a aula fica visível mas bloqueada. Aulas em rascunho não aparecem para ninguém.
+- **Aulas** — título, conteúdo em texto, link do vídeo (YouTube ou Vimeo), PDF de apoio (até 4 MB), carga horária, contrato a que se aplica (ou *todos os contratos*), data de início e prazo final. Fora da janela de datas a aula fica visível mas bloqueada. Aulas em rascunho não aparecem para ninguém. Havendo PDF, ele deixa de ser material opcional: vira exigência de conclusão.
 - **Profissionais** — nome, função, conselho e nº de inscrição, contrato, contato. Ao salvar, o sistema gera o **usuário** (`nome.sobrenome`, com sufixo se já existir) e uma **senha inicial**, exibidos uma única vez — copie e entregue ao profissional. A senha fica guardada só como hash (scrypt); se perder, use o botão da chave para gerar outra.
 - **Acompanhamento** — uma linha por profissional e por aula: quando assistiu pela primeira vez, último acesso, tempo assistido, percentual, situação e certificado. Filtra por contrato, situação e busca livre; exporta CSV (abre direto no Excel).
 - **Notificações** — todo comentário enviado cai aqui como não lido, com contador no menu. A aba ao lado mostra nominalmente quem curtiu e quem não curtiu cada aula.
 
 ### Profissional
 
-Vê apenas as aulas do seu contrato (mais as marcadas como "todos os contratos"), com prazo e progresso. Na aula: vídeo, conteúdo, PDF, curtir/não curtir, campo de comentário livre e botão de certificado.
+Vê apenas as aulas do seu contrato (mais as marcadas como "todos os contratos"), com prazo e progresso. A tela da aula abre com um quadro **"Para concluir esta aula"** listando o que falta — vídeo, leitura do PDF, ou os dois. Abaixo ficam o player, o leitor de PDF, curtir/não curtir, o campo de comentário e o botão de certificado.
 
 ## Regras que valem a pena conhecer
 
-- **Tempo assistido** — conta 1 segundo por segundo de vídeo em reprodução. Arrastar a barra para o fim não conta; sair da aba pausa a contagem. O tempo é gravado a cada 15 segundos e ao pausar.
-- **Certificado** — liberado com **90%** da duração do vídeo assistidos. Traz nome, função, conselho de classe, aula, carga horária, tempo registrado, data e um **código de validação** (`DOC-XXXX-XXXX`). Qualquer pessoa confere o código em `/?certificado=CODIGO` — inclusive sem login. O botão *Imprimir / salvar em PDF* já sai em A4 paisagem.
+- **Tempo assistido (vídeo)** — conta 1 segundo por segundo de vídeo em reprodução. Arrastar a barra para o fim não conta; sair da aba pausa a contagem. O tempo é gravado a cada 15 segundos e ao pausar.
+- **Leitura do material (PDF)** — o PDF abre dentro da própria aula e o tempo de leitura é contado do mesmo jeito: só com a aba em primeiro plano. Cumprido o tempo mínimo, libera o botão **"Li e compreendi o material"**; a aula só conclui depois dessa declaração, que fica registrada com data e hora.
+  - **Tempo mínimo de leitura:** aula sem vídeo → 90% da carga horária cadastrada (por isso a carga horária passa a ser obrigatória nesse caso); aula com vídeo → 2 minutos, já que o vídeo cobre a carga horária.
+  - **Aula com vídeo e PDF** exige as duas coisas: 90% do vídeo **e** a leitura confirmada.
+- **Certificado** — liberado quando todas as exigências da aula forem cumpridas. Traz nome, função, conselho de classe, aula, carga horária, tempo registrado, data e um **código de validação** (`DOC-XXXX-XXXX`). Qualquer pessoa confere o código em `/?certificado=CODIGO` — inclusive sem login. O botão *Imprimir / salvar em PDF* já sai em A4 paisagem.
 - **Prazos** — antes da data de início a aula aparece como "Em breve"; depois do prazo final ela trava e o tempo deixa de ser contado.
 - **Vídeos** — links do YouTube (`youtu.be/…`, `watch?v=…`, `/shorts/…`) e do Vimeo (inclusive com hash de vídeo privado). Deixe o vídeo como **não listado** para que só quem tem o link assista. Outros links são recusados no cadastro.
 - **Sessões** — duram 12 horas e são assinadas com `AUTH_SECRET`.
 
 ## Identidade visual
 
-As cores seguem a linha da DOC CSC (azul `#092e46` + verde `#16a88b`). Para usar a logo oficial, substitua os arquivos em `public/` (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`) e troque o bloco `.cert-logo` em `src/Certificate.jsx` por uma `<img>` com a logo — é o único lugar do certificado que usa a marca em texto.
+A marca DOC CSC está aplicada em todo o sistema: roxo `#6a59f7` como cor principal e azul-escuro `#1c1a40` nos menus e no login.
+
+Arquivos em `public/`:
+
+| Arquivo | Onde aparece |
+|---|---|
+| `logo-doccsc.png` | menu lateral e tela de login (fundos escuros) |
+| `logo-doccsc-escura.png` | certificado e tela de validação (fundos claros) |
+| `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | ícone do app e favicon |
+| `icon-maskable-512.png` | ícone adaptável do Android |
+
+Para trocar por novas versões da marca, basta substituir esses arquivos mantendo os nomes.
 
 O sistema é instalável como app de celular (PWA): no Android, menu ⋮ → *Instalar app*; no iPhone, *Compartilhar* → *Adicionar à Tela de Início*.
 
@@ -53,8 +67,8 @@ O sistema é instalável como app de celular (PWA): no Android, menu ⋮ → *In
 
 ```
 api/          auth, contracts, lessons, professionals, progress, engagement, certificate, pdf
-lib/          db (schema), auth (senhas e sessões), util (datas, vídeos, validações)
-src/          main (rotas), Login, Certificate, admin/*, student/* (Player mede o tempo)
+lib/          db (schema), auth (senhas e sessões), util (datas, vídeos, regra de conclusão)
+src/          main (rotas), Login, Certificate, admin/*, student/* (Player e PdfReader medem o tempo)
 db/schema.sql schema completo, opcional
 ```
 

@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {GraduationCap, KeyRound, LogIn, ShieldCheck, User} from 'lucide-react';
+import {KeyRound, LogIn, ShieldCheck, User} from 'lucide-react';
 import {api,saveSession} from './api.js';
 import {Alert} from './ui.jsx';
 
@@ -24,7 +24,7 @@ export default function Login({onDone}){
   return (
     <div className="login">
       <div className="login-side">
-        <div className="logo"><GraduationCap size={26}/></div>
+        <img className="login-logo" src="/logo-doccsc.png" alt="DOC CSC — Centro de Serviços Compartilhados"/>
         <h1>Educação Virtual</h1>
         <p>Plataforma de treinamento por contrato da <b>DOC CSC</b>: aulas em vídeo, material de apoio, acompanhamento de quem assistiu e emissão de certificados.</p>
         <ul>
