@@ -67,6 +67,25 @@ async function save(req,res,sql){
   return res.status(201).json({ok:true,id:newId,username,password});
 }
 
+/** Redefine a senha de todos os profissionais ativos de um contrato. */
+async function resetAll(req,res,sql){
+  const body=await readJson(req);
+  const contractId=String(body.contractId||'');
+  if(!UUID.test(contractId))return fail(res,400,'Selecione o contrato.');
+  const people=await sql`SELECT id,name,username,role FROM professionals
+    WHERE contract_id=${contractId}::uuid AND active=TRUE ORDER BY name`;
+  if(!people.length)return fail(res,400,'Este contrato não tem profissionais ativos.');
+  if(people.length>300)return fail(res,400,'Contrato com profissionais demais para redefinir de uma vez. Refaça por profissional.');
+
+  const credentials=[];
+  for(const person of people){
+    const password=randomPassword();
+    await sql`UPDATE professionals SET password_hash=${hashPassword(password)}, must_change=TRUE WHERE id=${person.id}::uuid`;
+    credentials.push({id:person.id,name:person.name,role:person.role,username:person.username,password});
+  }
+  return res.status(200).json({ok:true,total:credentials.length,credentials});
+}
+
 async function reset(req,res,sql){
   const id=String(req.query.id||'');
   if(!UUID.test(id))return fail(res,404,'Profissional não encontrado.');
@@ -83,7 +102,11 @@ export default async function handler(req,res){
     const sql=await db();
 
     if(req.method==='GET')return list(req,res,sql);
-    if(req.method==='POST')return req.query.action==='reset'?reset(req,res,sql):save(req,res,sql);
+    if(req.method==='POST'){
+      if(req.query.action==='reset')return reset(req,res,sql);
+      if(req.query.action==='reset-all')return resetAll(req,res,sql);
+      return save(req,res,sql);
+    }
 
     if(req.method==='DELETE'){
       const id=String(req.query.id||'');

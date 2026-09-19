@@ -24,6 +24,7 @@ export default function Professionals({contracts}){
   const [editing,setEditing]=useState(null);
   const [removing,setRemoving]=useState(null);
   const [credentials,setCredentials]=useState(null);
+  const [resetting,setResetting]=useState(null);
   const [busy,setBusy]=useState(false);
 
   async function load(contract=filter){
@@ -51,12 +52,13 @@ export default function Professionals({contracts}){
     finally{setBusy(false)}
   }
 
-  async function reset(person){
+  async function reset(){
     setBusy(true);
     try{
-      const data=await api('/api/professionals',{method:'POST',query:{action:'reset',id:person.id}});
+      const data=await api('/api/professionals',{method:'POST',query:{action:'reset',id:resetting.id}});
+      setResetting(null);
       setCredentials({name:data.name,username:data.username,password:data.password});
-    }catch(e){setError(e.message)}
+    }catch(e){setError(e.message);setResetting(null)}
     finally{setBusy(false)}
   }
 
@@ -127,7 +129,7 @@ export default function Professionals({contracts}){
                   <td className="num">{Number(p.completed)}/{Number(p.started)}</td>
                   <td><Badge tone={p.active?'ok':'off'}>{p.active?'Ativo':'Inativo'}</Badge></td>
                   <td className="row-actions">
-                    <button className="icon" title="Gerar nova senha" onClick={()=>reset(p)} disabled={busy}><KeyRound size={16}/></button>
+                    <button className="icon" title="Redefinir senha" onClick={()=>setResetting(p)} disabled={busy}><KeyRound size={16}/></button>
                     <button className="icon" title="Editar" onClick={()=>setEditing(toForm(p))}><Pencil size={16}/></button>
                     <button className="icon danger" title="Excluir" onClick={()=>setRemoving(p)}><Trash2 size={16}/></button>
                   </td>
@@ -196,6 +198,12 @@ export default function Professionals({contracts}){
             <button type="button" className="primary" onClick={()=>setCredentials(null)}>Concluído</button>
           </div>
         </Modal>
+      ):null}
+
+      {resetting?(
+        <Confirm title="Redefinir senha" confirmLabel="Gerar nova senha" busy={busy}
+                 message={`Uma senha provisória nova será gerada para ${resetting.name}. A senha atual deixa de funcionar na hora, e a nova aparece uma única vez.`}
+                 onConfirm={reset} onClose={()=>setResetting(null)}/>
       ):null}
 
       {removing?(

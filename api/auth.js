@@ -1,6 +1,7 @@
 import {db} from '../lib/db.js';
 import {createToken,hashPassword,requireUser,sameText,session,verifyPassword} from '../lib/auth.js';
 import {fail,handleError,norm,readJson,text} from '../lib/util.js';
+import {loadSettings} from '../lib/settings.js';
 
 function adminUser(){return process.env.ADMIN_USER||'admin'}
 
@@ -10,14 +11,17 @@ async function login(req,res){
   const password=text(body.password,200);
   if(!user||!password)return fail(res,400,'Informe o usuário e a senha.');
 
+  const sql=await db();
+  const settings=await loadSettings(sql);
+  const ttl=Math.max(1,Number(settings.sessionHours||12))*3600;
+
   if(body.mode==='admin'){
     const expected=process.env.ADMIN_PASSWORD;
     if(!expected)return fail(res,503,'Defina a variável ADMIN_PASSWORD no projeto da Vercel para liberar o acesso do administrador.');
     if(!sameText(norm(user),norm(adminUser()))||!sameText(password,expected))return fail(res,401,'Usuário ou senha do administrador incorretos.');
-    return res.status(200).json({token:createToken({role:'admin',name:'Administrador'}),role:'admin',name:'Administrador'});
+    return res.status(200).json({token:createToken({role:'admin',name:'Administrador'},ttl),role:'admin',name:'Administrador'});
   }
 
-  const sql=await db();
   const rows=await sql`SELECT p.*, c.name AS contract_name, c.active AS contract_active
                        FROM professionals p JOIN contracts c ON c.id=p.contract_id
                        WHERE lower(p.username)=${norm(user)} LIMIT 1`;
@@ -27,11 +31,11 @@ async function login(req,res){
   if(!person.contract_active)return fail(res,403,'O contrato deste acesso está inativo. Fale com o administrador.');
 
   return res.status(200).json({
-    token:createToken({role:'user',id:person.id,name:person.name,contract:person.contract_id}),
+    token:createToken({role:'user',id:person.id,name:person.name,contract:person.contract_id},ttl),
     role:'user',
     name:person.name,
     contractName:person.contract_name,
-    mustChange:person.must_change
+    mustChange:person.must_change&&settings.requirePasswordChange!==false
   });
 }
 

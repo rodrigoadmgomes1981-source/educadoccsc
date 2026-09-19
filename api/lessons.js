@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {db} from '../lib/db.js';
 import {requireAdmin,session} from '../lib/auth.js';
 import {MAX_UPLOAD,UUID,bool,evaluateLesson,fail,handleError,parseVideo,readForm,text,toDate,toInt} from '../lib/util.js';
+import {loadSettings} from '../lib/settings.js';
 
 /** Lista para o administrador, com indicadores de cada aula. */
 async function listForAdmin(req,res,sql){
@@ -26,6 +27,7 @@ async function listForAdmin(req,res,sql){
 
 /** Lista para o profissional: aulas do contrato dele (ou de todos os contratos). */
 async function listForUser(req,res,sql,auth){
+  const settings=await loadSettings(sql);
   const rows=await sql`
     SELECT l.id,l.title,l.content,l.video_url,l.video_provider,l.video_id,l.workload_minutes,l.pdf_name,
            to_char(l.starts_on,'YYYY-MM-DD') AS starts_on,
@@ -46,7 +48,7 @@ async function listForUser(req,res,sql,auth){
   const lessons=rows.map(l=>{
     const before=l.starts_on&&today<String(l.starts_on).slice(0,10);
     const after=l.ends_on&&today>String(l.ends_on).slice(0,10);
-    const state=evaluateLesson(l,l);
+    const state=evaluateLesson(l,l,settings);
     return {...l,
       available:!before&&!after,
       status:before?'agendada':after?'encerrada':'disponivel',
@@ -59,6 +61,11 @@ async function listForUser(req,res,sql,auth){
       pdfOk:state.pdfOk,
       hasVideo:state.hasVideo,
       hasPdf:state.hasPdf,
+      pdfMandatory:state.pdfMandatory,
+      videoTarget:state.videoTarget,
+      allowReactions:settings.allowReactions,
+      allowComments:settings.allowComments,
+      allowSelfCertificate:settings.allowSelfCertificate,
       complete:!!l.completed_at||state.complete
     };
   });

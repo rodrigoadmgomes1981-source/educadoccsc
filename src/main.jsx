@@ -1,6 +1,6 @@
 import {StrictMode,useCallback,useEffect,useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Bell, Briefcase, ClipboardList, KeyRound, LogOut, Users, Video} from 'lucide-react';
+import {Bell, Briefcase, ClipboardList, KeyRound, LogOut, Sliders, Users, Video} from 'lucide-react';
 import {api,clearSession,loadSession,saveSession} from './api.js';
 import {Alert,Field,Modal} from './ui.jsx';
 import Login from './Login.jsx';
@@ -10,6 +10,7 @@ import Lessons from './admin/Lessons.jsx';
 import Professionals from './admin/Professionals.jsx';
 import Tracking from './admin/Tracking.jsx';
 import Notifications from './admin/Notifications.jsx';
+import Settings from './admin/Settings.jsx';
 import Student from './student/Student.jsx';
 import './styles.css';
 
@@ -18,7 +19,8 @@ const TABS=[
   {key:'lessons',label:'Aulas',icon:Video},
   {key:'professionals',label:'Profissionais',icon:Users},
   {key:'tracking',label:'Acompanhamento',icon:ClipboardList},
-  {key:'notifications',label:'Notificações',icon:Bell}
+  {key:'notifications',label:'Notificações',icon:Bell},
+  {key:'settings',label:'Configurações',icon:Sliders}
 ];
 
 function ChangePassword({onClose,onDone}){
@@ -58,6 +60,7 @@ function ChangePassword({onClose,onDone}){
 function AdminApp({session,onLogout}){
   const [tab,setTab]=useState('contracts');
   const [contracts,setContracts]=useState([]);
+  const [settings,setSettings]=useState(null);
   const [unread,setUnread]=useState(0);
   const [error,setError]=useState('');
 
@@ -75,7 +78,14 @@ function AdminApp({session,onLogout}){
     }catch{}
   },[]);
 
-  useEffect(()=>{loadContracts();loadUnread()},[loadContracts,loadUnread]);
+  const loadSettings=useCallback(async()=>{
+    try{
+      const data=await api('/api/settings');
+      setSettings(data.settings||null);
+    }catch{}
+  },[]);
+
+  useEffect(()=>{loadContracts();loadUnread();loadSettings()},[loadContracts,loadUnread,loadSettings]);
   useEffect(()=>{
     const timer=setInterval(loadUnread,60000);
     return()=>clearInterval(timer);
@@ -105,10 +115,11 @@ function AdminApp({session,onLogout}){
       <main>
         <Alert onClose={()=>setError('')}>{error}</Alert>
         {tab==='contracts'?<Contracts onChanged={loadContracts}/>:null}
-        {tab==='lessons'?<Lessons contracts={contracts} onChanged={loadContracts}/>:null}
+        {tab==='lessons'?<Lessons contracts={contracts} settings={settings} onChanged={loadContracts}/>:null}
         {tab==='professionals'?<Professionals contracts={contracts}/>:null}
         {tab==='tracking'?<Tracking contracts={contracts}/>:null}
         {tab==='notifications'?<Notifications onRead={setUnread}/>:null}
+        {tab==='settings'?<Settings contracts={contracts} onSaved={setSettings}/>:null}
       </main>
     </div>
   );

@@ -5,7 +5,7 @@ import {Alert,Badge,Empty,Progress,Spinner,daysLeft,formatDate,formatDuration} f
 import Player from './Player.jsx';
 import PdfReader from './PdfReader.jsx';
 
-const VIDEO_TARGET=90;
+
 
 export default function Student({session}){
   const [lessons,setLessons]=useState([]);
@@ -41,6 +41,7 @@ export default function Student({session}){
       pdfPercent:data.pdfPercent,
       pdfRequired:data.pdfRequired,
       pdfTimeOk:data.pdfTimeOk,
+      pdfMandatory:data.pdfMandatory??item.pdfMandatory,
       videoOk:data.videoOk,
       pdfOk:data.pdfOk,
       completed_at:data.completedAt||item.completed_at,
@@ -156,13 +157,13 @@ export default function Student({session}){
             <div className={current.videoOk?'done':''}>
               {current.videoOk?<CheckCircle2 size={17}/>:<Circle size={17}/>}
               <div>
-                <b>Assistir {VIDEO_TARGET}% do vídeo</b>
+                <b>Assistir {current.videoTarget||90}% do vídeo</b>
                 <span>{formatDuration(current.watched_seconds)} assistidos{current.duration_seconds?` de ${formatDuration(current.duration_seconds)}`:''} · {current.videoPercent||0}%</span>
               </div>
               <Progress percent={current.videoPercent}/>
             </div>
           ):null}
-          {current.hasPdf?(
+          {current.pdfMandatory?(
             <div className={current.pdfOk?'done':''}>
               {current.pdfOk?<CheckCircle2 size={17}/>:<Circle size={17}/>}
               <div>
@@ -172,8 +173,8 @@ export default function Student({session}){
               <Progress percent={current.pdfPercent}/>
             </div>
           ):null}
-          {!current.hasVideo&&!current.hasPdf?(
-            <p className="muted">Esta aula não tem vídeo nem material em PDF. Fale com o administrador para emitir o certificado.</p>
+          {!current.hasVideo&&!current.pdfMandatory?(
+            <p className="muted">Esta aula não tem vídeo nem material obrigatório. Fale com o administrador para emitir o certificado.</p>
           ):null}
         </div>
 
@@ -183,22 +184,30 @@ export default function Student({session}){
         ):null}
 
         <div className="lesson-toolbar">
-          <button className={current.reaction===1?'chip active':'chip'} onClick={()=>react(1)} disabled={!current.available}>
-            <ThumbsUp size={16}/> Curtir {Number(current.likes||0)>0?`(${current.likes})`:''}
-          </button>
-          <button className={current.reaction===-1?'chip active down':'chip'} onClick={()=>react(-1)} disabled={!current.available}>
-            <ThumbsDown size={16}/> Não curtir {Number(current.dislikes||0)>0?`(${current.dislikes})`:''}
-          </button>
+          {current.allowReactions!==false?(
+            <>
+              <button className={current.reaction===1?'chip active':'chip'} onClick={()=>react(1)} disabled={!current.available}>
+                <ThumbsUp size={16}/> Curtir {Number(current.likes||0)>0?`(${current.likes})`:''}
+              </button>
+              <button className={current.reaction===-1?'chip active down':'chip'} onClick={()=>react(-1)} disabled={!current.available}>
+                <ThumbsDown size={16}/> Não curtir {Number(current.dislikes||0)>0?`(${current.dislikes})`:''}
+              </button>
+            </>
+          ):null}
           {current.certificate_code?(
             <a className="chip gold" href={`?certificado=${current.certificate_code}`} target="_blank" rel="noreferrer">
               <Award size={16}/> Ver certificado
             </a>
-          ):(
+          ):current.allowSelfCertificate!==false?(
             <button className="chip gold" onClick={certificate} disabled={!ready||busy}
                     title={ready?'Emitir certificado':'Cumpra os itens acima para liberar'}>
               <Award size={16}/> {busy?'Emitindo...':'Emitir certificado'}
             </button>
-          )}
+          ):ready?(
+            <span className="chip gold" title="Emissão feita pelo administrador">
+              <Award size={16}/> Certificado a emitir pelo administrador
+            </span>
+          ):null}
         </div>
 
         {current.content?(
@@ -208,6 +217,7 @@ export default function Student({session}){
           </article>
         ):null}
 
+        {current.allowComments!==false?(
         <form className="comment-box" onSubmit={send}>
           <h3><MessageSquare size={17}/> Comentário</h3>
           <p className="muted">Dúvidas, sugestões ou observações sobre a aula. O administrador recebe a notificação no painel.</p>
@@ -215,6 +225,7 @@ export default function Student({session}){
                     placeholder="Escreva aqui o seu comentário..." required minLength={2}/>
           <button className="primary" disabled={busy||comment.trim().length<2}><Send size={16}/> Enviar comentário</button>
         </form>
+        ):null}
       </section>
     );
   }

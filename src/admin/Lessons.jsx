@@ -21,7 +21,7 @@ function toForm(lesson){
   };
 }
 
-export default function Lessons({contracts,onChanged}){
+export default function Lessons({contracts,settings,onChanged}){
   const [lessons,setLessons]=useState([]);
   const [filter,setFilter]=useState('');
   const [loading,setLoading]=useState(true);
@@ -46,7 +46,15 @@ export default function Lessons({contracts,onChanged}){
 
   function open(lesson){
     setRemovePdf(false);
-    setEditing(toForm(lesson));
+    const form=toForm(lesson);
+    // Nova aula: já sugere o prazo padrão definido em Configurações.
+    const days=Number(settings?.defaultLessonDays||0);
+    if(!lesson&&days>0&&!form.endsOn){
+      const end=new Date();
+      end.setDate(end.getDate()+days);
+      form.endsOn=end.toISOString().slice(0,10);
+    }
+    setEditing(form);
   }
 
   async function save(event){
@@ -145,7 +153,7 @@ export default function Lessons({contracts,onChanged}){
 
       {editing?(
         <Modal wide title={editing.id?'Editar aula':'Nova aula'}
-               subtitle="Vídeo por link do YouTube ou Vimeo (90% assistidos). Havendo PDF, o profissional também precisa lê-lo e confirmar a leitura."
+               subtitle={`Vídeo por link do YouTube ou Vimeo (${settings?.videoPercent??90}% assistidos).${settings?.requirePdfWithVideo===false?" Com vídeo, o PDF é apenas material de apoio.":" Havendo PDF, o profissional também precisa lê-lo e confirmar a leitura."}`}
                onClose={()=>setEditing(null)}>
           <form onSubmit={save} className="form-grid">
             <Field label="Título da aula *" span={2}>
@@ -164,7 +172,7 @@ export default function Lessons({contracts,onChanged}){
             <Field label="Link do vídeo" span={2} hint="Ex.: https://youtu.be/XXXXXXX ou https://vimeo.com/123456789">
               <input value={editing.videoUrl} onChange={e=>set('videoUrl',e.target.value)} placeholder="https://"/>
             </Field>
-            <Field label="Carga horária (minutos)" hint="Aparece no certificado. Sem vídeo, define o tempo mínimo de leitura do PDF (90% dela).">
+            <Field label="Carga horária (minutos)" hint={`Aparece no certificado. Sem vídeo, define o tempo mínimo de leitura do PDF (${settings?.pdfWorkloadPercent??90}% dela).`}>
               <input inputMode="numeric" value={editing.workloadMinutes} onChange={e=>set('workloadMinutes',e.target.value.replace(/\D/g,''))}/>
             </Field>
             <Field label="Data de início" hint="Quando a aula fica disponível.">

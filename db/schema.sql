@@ -85,6 +85,13 @@ CREATE TABLE IF NOT EXISTS comments (
   read_at TIMESTAMPTZ
 );
 
+-- Parâmetros editáveis na tela de Configurações (linha única, id = 1).
+CREATE TABLE IF NOT EXISTS settings (
+  id SMALLINT PRIMARY KEY,
+  data TEXT NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_lessons_contract ON lessons(contract_id);
 CREATE INDEX IF NOT EXISTS idx_professionals_contract ON professionals(contract_id);
 CREATE INDEX IF NOT EXISTS idx_progress_lesson ON progress(lesson_id);

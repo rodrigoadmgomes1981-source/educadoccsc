@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {db} from '../lib/db.js';
 import {requireAdmin,requireUser,session} from '../lib/auth.js';
 import {UUID,fail,handleError,readJson,text} from '../lib/util.js';
+import {loadSettings} from '../lib/settings.js';
 
 async function assertLesson(sql,res,auth,lessonId){
   if(!UUID.test(lessonId)){fail(res,404,'Aula não encontrada.');return false}
@@ -14,6 +15,8 @@ async function assertLesson(sql,res,auth,lessonId){
 async function react(req,res,sql){
   const auth=requireUser(req,res);
   if(!auth)return;
+  const settings=await loadSettings(sql);
+  if(settings.allowReactions===false)return fail(res,403,'As avaliações estão desativadas nas configurações.');
   const body=await readJson(req);
   const lessonId=String(body.lessonId||'');
   if(!await assertLesson(sql,res,auth,lessonId))return;
@@ -34,6 +37,8 @@ async function react(req,res,sql){
 async function comment(req,res,sql){
   const auth=requireUser(req,res);
   if(!auth)return;
+  const settings=await loadSettings(sql);
+  if(settings.allowComments===false)return fail(res,403,'Os comentários estão desativados nas configurações.');
   const body=await readJson(req);
   const lessonId=String(body.lessonId||'');
   if(!await assertLesson(sql,res,auth,lessonId))return;

@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {db} from '../lib/db.js';
 import {requireAdmin,requireUser} from '../lib/auth.js';
 import {UUID,evaluateLesson,fail,handleError,readJson,toInt} from '../lib/util.js';
+import {loadSettings} from '../lib/settings.js';
 
 /** Carrega a aula e confere se o profissional pode registrar tempo nela agora. */
 async function openLesson(sql,res,auth,lessonId){
@@ -20,8 +21,8 @@ async function openLesson(sql,res,auth,lessonId){
 }
 
 /** Marca a aula como concluída quando todas as exigências forem cumpridas. */
-async function settle(sql,lesson,row){
-  const state=evaluateLesson(lesson,row);
+async function settle(sql,lesson,row,settings){
+  const state=evaluateLesson(lesson,row,settings);
   let completedAt=row.completed_at;
   if(!completedAt&&state.complete){
     const done=await sql`UPDATE progress SET completed_at=NOW() WHERE id=${row.id}::uuid RETURNING completed_at`;
@@ -37,6 +38,7 @@ async function settle(sql,lesson,row){
     pdfPercent:state.pdfPercent,
     pdfRequired:state.pdfRequired,
     pdfTimeOk:state.pdfTimeOk,
+    pdfMandatory:state.pdfMandatory,
     videoOk:state.videoOk,
     pdfOk:state.pdfOk,
     completedAt,
@@ -52,6 +54,7 @@ async function heartbeat(req,res,sql){
   const lesson=await openLesson(sql,res,auth,String(body.lessonId||''));
   if(!lesson)return;
 
+  const settings=await loadSettings(sql);
   const isPdf=body.kind==='pdf';
   if(isPdf&&!lesson.pdf_name)return fail(res,400,'Esta aula não tem material em PDF.');
 
@@ -73,7 +76,7 @@ async function heartbeat(req,res,sql){
       last_view_at=NOW()
     RETURNING id,watched_seconds,duration_seconds,pdf_seconds,pdf_confirmed_at,completed_at,certificate_code`;
 
-  return res.status(200).json(await settle(sql,lesson,saved[0]));
+  return res.status(200).json(await settle(sql,lesson,saved[0],settings));
 }
 
 /** Declaração de leitura do material em PDF. */
@@ -89,7 +92,8 @@ async function confirmReading(req,res,sql){
     FROM progress WHERE lesson_id=${lesson.id}::uuid AND professional_id=${auth.id}::uuid`;
   if(!rows.length)return fail(res,400,'Abra o material em PDF antes de confirmar a leitura.');
 
-  const state=evaluateLesson(lesson,rows[0]);
+  const settings=await loadSettings(sql);
+  const state=evaluateLesson(lesson,rows[0],settings);
   if(!state.pdfTimeOk)
     return fail(res,400,`O material precisa ficar aberto por pelo menos ${Math.round(state.pdfRequired/60)} minutos. Tempo de leitura registrado: ${Math.round(state.pdfSeconds/60)} min.`);
 
@@ -97,7 +101,7 @@ async function confirmReading(req,res,sql){
     WHERE id=${rows[0].id}::uuid
     RETURNING id,watched_seconds,duration_seconds,pdf_seconds,pdf_confirmed_at,completed_at,certificate_code`;
 
-  return res.status(200).json(await settle(sql,lesson,updated[0]));
+  return res.status(200).json(await settle(sql,lesson,updated[0],settings));
 }
 
 /** Relatório por contrato: quem assistiu, quando, por quanto tempo e a leitura do PDF. */
@@ -105,6 +109,7 @@ async function report(req,res,sql){
   if(!requireAdmin(req,res))return;
   const contract=String(req.query.contract||'');
   const filter=UUID.test(contract)?contract:null;
+  const settings=await loadSettings(sql);
   const rows=await sql`
     SELECT p.id AS professional_id,p.name,p.role,p.council,p.council_number,p.contract_id,
            c.name AS contract_name,
@@ -119,7 +124,7 @@ async function report(req,res,sql){
     WHERE ${filter}::uuid IS NULL OR p.contract_id=${filter}::uuid
     ORDER BY c.name,p.name,l.created_at DESC`;
   const report=rows.map(r=>{
-    const state=evaluateLesson(r,r);
+    const state=evaluateLesson(r,r,settings);
     const started=Number(r.watched_seconds||0)>0||Number(r.pdf_seconds||0)>0;
     return {...r,
       percent:state.percent,
@@ -128,6 +133,7 @@ async function report(req,res,sql){
       pdfRequired:state.pdfRequired,
       hasVideo:state.hasVideo,
       hasPdf:state.hasPdf,
+      pdfMandatory:state.pdfMandatory,
       eligible:!!r.completed_at||state.complete,
       state:r.completed_at||state.complete?'concluida':started?'em andamento':'nao iniciada'};
   });

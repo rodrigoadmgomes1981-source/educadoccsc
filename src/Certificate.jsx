@@ -18,6 +18,7 @@ function longDate(value){
 export default function Certificate({code:initial}){
   const [code,setCode]=useState(initial||'');
   const [data,setData]=useState(null);
+  const [conf,setConf]=useState({});
   const [loading,setLoading]=useState(!!initial);
   const [error,setError]=useState('');
 
@@ -32,6 +33,9 @@ export default function Certificate({code:initial}){
   }
 
   useEffect(()=>{if(initial)find(initial)},[initial]);
+  useEffect(()=>{
+    api('/api/settings',{auth:false}).then(r=>setConf(r.settings||{})).catch(()=>{});
+  },[]);
 
   if(loading)return <div className="certificate-page"><Spinner label="Consultando o certificado..."/></div>;
 
@@ -80,7 +84,7 @@ export default function Certificate({code:initial}){
             {data.professional_role?<>na função de <b>{data.professional_role}</b>{council?<>, inscrição <b>{council}</b></>:null}, </>:null}
             concluiu o treinamento <b>“{data.lesson_title}”</b>
             {hours?<>, com carga horária de <b>{workload}</b></>:null}
-            , promovido pela DOC CSC no âmbito do contrato <b>{data.contract_name}</b>
+            , promovido pela {conf.institution||'DOC CSC'} no âmbito do contrato <b>{data.contract_name}</b>
             {data.completed_date?<>, tendo cumprido {hasVideo&&hasPdf?'o conteúdo em vídeo e a leitura do material':hasPdf?'a leitura integral do material':'o conteúdo integral'} em <b>{formatDate(data.completed_date)}</b></>:null}.
           </p>
 
@@ -94,11 +98,12 @@ export default function Certificate({code:initial}){
           <footer>
             <div className="cert-sign">
               <i/>
-              <b>DOC CSC · Educação Virtual</b>
-              <span>Coordenação de Treinamento</span>
+              <b>{conf.certificateSignature||'DOC CSC · Educação Virtual'}</b>
+              <span>{conf.certificateRole||'Coordenação de Treinamento'}</span>
             </div>
             <div className="cert-place">
-              <span>{longDate(data.certificate_date||data.completed_date)}</span>
+              <span>{conf.certificateCity?`${conf.certificateCity}, `:''}{longDate(data.certificate_date||data.completed_date)}</span>
+              {conf.certificateNote?<small>{conf.certificateNote}</small>:null}
               <small>Valide em {location.host}/?certificado={data.certificate_code}</small>
             </div>
           </footer>

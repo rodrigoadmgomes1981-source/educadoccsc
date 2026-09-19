@@ -1,6 +1,7 @@
 import {db} from '../lib/db.js';
 import {session} from '../lib/auth.js';
 import {UUID,certificateCode,evaluateLesson,fail,handleError,missingMessage,readJson,text} from '../lib/util.js';
+import {loadSettings} from '../lib/settings.js';
 
 /** Consulta pública pelo código impresso no certificado. */
 async function validate(req,res,sql){
@@ -39,7 +40,10 @@ async function issue(req,res,sql){
     WHERE g.lesson_id=${lessonId}::uuid AND g.professional_id=${professionalId}::uuid`;
   if(!rows.length)return fail(res,400,'Esta aula ainda não foi iniciada.');
   const row=rows[0];
-  const state=evaluateLesson(row,row);
+  const settings=await loadSettings(sql);
+  if(auth.role!=='admin'&&settings.allowSelfCertificate===false)
+    return fail(res,403,'A emissão do certificado é feita pelo administrador do contrato.');
+  const state=evaluateLesson(row,row,settings);
   if(!row.completed_at&&!state.complete)return fail(res,400,missingMessage(state));
 
   if(row.certificate_code)return res.status(200).json({ok:true,code:row.certificate_code});
